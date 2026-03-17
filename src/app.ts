@@ -1,10 +1,12 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { apiPort } from './config.js'; 
+import { apiPort } from './config.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import ofertaRoutes from './routes/ofertaRoutes.js';
 import solicitudRoutes from './routes/solicitudRoutes.js';
 import { httpLogger } from './middlewares/loggerMiddleware.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './swagger.js';
 
 const app = express();
 
@@ -32,10 +34,10 @@ app.use(httpLogger);
  * Simple, stateless endpoint to verify the server is running.
  */
 app.get('/ping', (_req: Request, res: Response) => {
-    res.status(200).json({ 
-        status: 'ok', 
+    res.status(200).json({
+        status: 'ok',
         uptime: process.uptime(),
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString()
     });
 });
 
@@ -46,6 +48,11 @@ app.get('/ping', (_req: Request, res: Response) => {
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/ofertas', ofertaRoutes);
 app.use('/api/solicitudes', solicitudRoutes);
+
+/**
+ * 📖 API DOCUMENTATION (SWAGGER)
+ */
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /**
  * ERROR HANDLING

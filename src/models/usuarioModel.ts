@@ -2,6 +2,62 @@ import { Schema, model, Types } from 'mongoose';
 
 export const userRoles = ['OWNER', 'INTERESTED'] as const;
 
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Usuario:
+ *       type: object
+ *       required:
+ *         - fullName
+ *         - email
+ *         - password
+ *         - role
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: ID autogenerado de MongoDB
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d1'
+ *         fullName:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 120
+ *           example: 'Juan Pérez'
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: 'juan@relevo.io'
+ *         password:
+ *           type: string
+ *           minLength: 6
+ *           format: password
+ *           example: '********'
+ *         role:
+ *           type: string
+ *           enum: [OWNER, INTERESTED]
+ *           example: 'INTERESTED'
+ *         location:
+ *           type: string
+ *           maxLength: 120
+ *           example: 'Barcelona'
+ *         bio:
+ *           type: string
+ *           maxLength: 500
+ *           example: 'Emprendedor enfocado en sostenibilidad'
+ *         professionalBackground:
+ *           type: string
+ *           maxLength: 2000
+ *         preferredRegions:
+ *           type: array
+ *           items:
+ *             type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
 export interface IUsuario {
   _id?: Types.ObjectId;
   role: (typeof userRoles)[number];
