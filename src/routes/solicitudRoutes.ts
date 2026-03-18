@@ -3,11 +3,185 @@ import * as solicitudController from '../controllers/solicitudController.js';
 
 const router = Router();
 
+/**
+ * @openapi
+ * tags:
+ *   name: Solicitudes
+ *   description: API per a la gestió de sol·licituds d'accés a ofertes.
+ */
+
+/**
+ * @openapi
+ * /api/solicitudes:
+ *   get:
+ *     summary: Obté la llista completa de sol·licituds
+ *     tags: [Solicitudes]
+ *     responses:
+ *       200:
+ *         description: Llista de sol·licituds recuperada correctament
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Solicitud'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 router.get('/', solicitudController.getSolicitudes);
+
+/**
+ * @openapi
+ * /api/solicitudes/{id}:
+ *   get:
+ *     summary: Obté una sol·licitud per ID
+ *     tags: [Solicitudes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la sol·licitud a recuperar
+ *     responses:
+ *       200:
+ *         description: Sol·licitud recuperada correctament
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Solicitud'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 router.get('/:id', solicitudController.getSolicitud);
+
+/**
+ * @openapi
+ * /api/solicitudes:
+ *   post:
+ *     summary: Crea una nova sol·licitud
+ *     tags: [Solicitudes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateSolicitud'
+ *     responses:
+ *       201:
+ *         description: Sol·licitud creada correctament
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Solicitud'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 router.post('/', solicitudController.createSolicitud);
+
+/**
+ * @openapi
+ * /api/solicitudes/{id}:
+ *   put:
+ *     summary: Actualitza una sol·licitud per ID
+ *     tags: [Solicitudes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la sol·licitud a actualitzar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateSolicitud'
+ *     responses:
+ *       200:
+ *         description: Sol·licitud actualitzada correctament
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Solicitud'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 router.put('/:id', solicitudController.updateSolicitud);
+
+/**
+ * @openapi
+ * /api/solicitudes/{id}:
+ *   delete:
+ *     summary: Elimina una sol·licitud per ID
+ *     tags: [Solicitudes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la sol·licitud a eliminar
+ *     responses:
+ *       204:
+ *         description: Sol·licitud eliminada correctament
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 router.delete('/:id', solicitudController.deleteSolicitud);
+
+/**
+ * @openapi
+ * /api/solicitudes/{id}/status:
+ *   patch:
+ *     summary: Canvia l'estat d'una sol·licitud
+ *     tags: [Solicitudes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la sol·licitud a actualitzar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, ACCEPTED, REJECTED]
+ *                 description: Nou estat de la sol·licitud
+ *                 example: 'ACCEPTED'
+ *     responses:
+ *       200:
+ *         description: Estat de la sol·licitud actualitzat correctament
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Solicitud'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 router.patch('/:id/status', solicitudController.patchEstadoSolicitud);
 
 export default router;

@@ -42,7 +42,20 @@ const options: swaggerJsdoc.Options = {
               }
             }
           }
-        }
+        },
+        BadRequest: {
+          description: 'Petición inválida',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
       }
     }
   },

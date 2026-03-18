@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { UsuarioModel, IUsuario } from './models/usuarioModel.js';
 import { OfertaModel, IOferta } from './models/ofertaModel.js';
+import { SolicitudModel, ISolicitud } from './models/solicitudModel.js';
 import { config, logger } from './config.js';
 
 export async function setupDatabase(): Promise<void> {
@@ -19,6 +20,7 @@ export async function seedingDatabase(): Promise<void> {
         logger.warn('Cleaning database collections...');
         await UsuarioModel.deleteMany({});
         await OfertaModel.deleteMany({});
+        await SolicitudModel.deleteMany({});
 
         logger.info('Seeding initial data...');
 
@@ -81,6 +83,26 @@ export async function seedingDatabase(): Promise<void> {
 
         const createdOfertas = await OfertaModel.insertMany(ofertasData);
         logger.info('Database ready: %d offers created.', createdOfertas.length);
+
+        const solicitudesData: ISolicitud[] = [
+            {
+                owner: createdUsers[0]._id,
+                interestedUser: createdUsers[1]._id,
+                opportunity: createdOfertas[0]._id,
+                status: 'PENDING',
+                message: 'I am interested in your company. Could we talk?'
+            },
+            {
+                owner: createdUsers[1]._id,
+                interestedUser: createdUsers[0]._id,
+                opportunity: createdOfertas[1]._id,
+                status: 'ACCEPTED',
+                message: 'I am interested in your company. Could we talk?'
+            }
+        ];
+
+        const createdSolicitudes = await SolicitudModel.insertMany(solicitudesData);
+        logger.info('Database ready: %d requests created.', createdSolicitudes.length);
 
     } catch (err) {
         logger.error(err, 'Seeding failed');
