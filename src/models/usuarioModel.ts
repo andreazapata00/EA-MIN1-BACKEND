@@ -1,6 +1,13 @@
 import { Schema, model, Types } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export const userRoles = ['OWNER', 'INTERESTED'] as const;
+
+const SALT_ROUNDS = 12;
+
+const hashPassword = async (plainPassword: string): Promise<string> => {
+  return bcrypt.hash(plainPassword, SALT_ROUNDS);
+};
 
 /**
  * @openapi
@@ -138,5 +145,40 @@ const usuarioSchema = new Schema<IUsuario>(
     timestamps: true
   }
 );
+
+usuarioSchema.pre('save', async function () {
+  if (!this.isModified('password')) {
+    return;
+  }
+
+  this.password = await hashPassword(this.password);
+});
+
+usuarioSchema.pre('findOneAndUpdate', async function () {
+  const update = this.getUpdate();
+  if (!update || Array.isArray(update)) {
+    return;
+  }
+
+  const typedUpdate = update as {
+    password?: string;
+    $set?: {
+      password?: string;
+    };
+  };
+
+  const plainPassword = typedUpdate.$set?.password ?? typedUpdate.password;
+  if (!plainPassword) {
+    return;
+  }
+
+  const hashedPassword = await hashPassword(plainPassword);
+  if (typedUpdate.$set?.password) {
+    typedUpdate.$set.password = hashedPassword;
+    return;
+  }
+
+  typedUpdate.password = hashedPassword;
+});
 
 export const UsuarioModel = model<IUsuario>('Usuario', usuarioSchema);
