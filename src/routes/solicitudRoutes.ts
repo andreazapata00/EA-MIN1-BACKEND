@@ -1,5 +1,12 @@
 import { Router } from 'express';
 import * as solicitudController from '../controllers/solicitudController.js';
+import { validate } from '../middlewares/validatorMiddleware.js';
+import {
+	createSolicitudSchema,
+	solicitudIdParamsSchema,
+	updateSolicitudSchema,
+	updateSolicitudStatusSchema
+} from '../validators/solicitudValidator.js';
 
 const router = Router();
 
@@ -55,7 +62,7 @@ router.get('/', solicitudController.getSolicitudes);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get('/:id', solicitudController.getSolicitud);
+router.get('/:id', validate({ params: solicitudIdParamsSchema }), solicitudController.getSolicitud);
 
 /**
  * @openapi
@@ -81,7 +88,7 @@ router.get('/:id', solicitudController.getSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/', solicitudController.createSolicitud);
+router.post('/', validate({ body: createSolicitudSchema }), solicitudController.createSolicitud);
 
 /**
  * @openapi
@@ -116,7 +123,14 @@ router.post('/', solicitudController.createSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.put('/:id', solicitudController.updateSolicitud);
+router.put(
+	'/:id',
+	validate({
+		params: solicitudIdParamsSchema,
+		body: updateSolicitudSchema
+	}),
+	solicitudController.updateSolicitud
+);
 
 /**
  * @openapi
@@ -139,7 +153,7 @@ router.put('/:id', solicitudController.updateSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.delete('/:id', solicitudController.deleteSolicitud);
+router.delete('/:id', validate({ params: solicitudIdParamsSchema }), solicitudController.deleteSolicitud);
 
 /**
  * @openapi
@@ -182,6 +196,13 @@ router.delete('/:id', solicitudController.deleteSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.patch('/:id/status', solicitudController.patchEstadoSolicitud);
+router.patch(
+	'/:id/status',
+	validate({
+		params: solicitudIdParamsSchema,
+		body: updateSolicitudStatusSchema
+	}),
+	solicitudController.patchEstadoSolicitud
+);
 
 export default router;

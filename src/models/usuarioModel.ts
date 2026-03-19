@@ -16,6 +16,7 @@ export const userRoles = ['OWNER', 'INTERESTED'] as const;
  *       properties:
  *         _id:
  *           type: string
+ *           readOnly: true
  *           description: ID autogenerado de MongoDB
  *           example: '64f1a2b3c4d5e6f7a8b9c0d1'
  *         fullName:
@@ -57,9 +58,11 @@ export const userRoles = ['OWNER', 'INTERESTED'] as const;
  *           example: true
  *         createdAt:
  *           type: string
+ *           readOnly: true
  *           format: date-time
  *         updatedAt:
  *           type: string
+ *           readOnly: true
  *           format: date-time
  */
 export interface IUsuario {

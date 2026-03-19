@@ -1,9 +1,36 @@
 import { z } from 'zod';
+import { userRoles } from '../models/usuarioModel.js';
 
 const objectIdRegex = /^[a-fA-F0-9]{24}$/;
+const objectIdSchema = z.string().regex(objectIdRegex, 'El id debe tener formato ObjectId válido');
+
+const usuarioBaseSchema = z.object({
+  role: z.enum(userRoles, { message: 'Rol inválido' }),
+  fullName: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(120),
+  email: z.string().trim().email('Email inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  location: z.string().trim().max(120).optional(),
+  bio: z.string().max(500).optional(),
+  professionalBackground: z.string().max(2000).optional(),
+  preferredRegions: z.array(z.string().trim()).optional(),
+  visible: z.boolean().optional()
+});
+
+export const createUsuarioSchema = usuarioBaseSchema.strict();
+
+export const updateUsuarioSchema = usuarioBaseSchema
+  .partial()
+  .strict()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'Debes enviar al menos un campo para actualizar'
+  });
 
 export const deleteManyUsuariosSchema = z.object({
-  ids: z.array(z.string().regex(objectIdRegex, 'Cada id debe tener formato ObjectId válido')).min(1, 'Debes enviar al menos un id')
+  ids: z.array(objectIdSchema).min(1, 'Debes enviar al menos un id')
+});
+
+export const usuarioIdParamsSchema = z.object({
+  id: objectIdSchema
 });
 
 export const updateUsuarioVisibilitySchema = z.object({
@@ -11,10 +38,13 @@ export const updateUsuarioVisibilitySchema = z.object({
 });
 
 export const updateManyUsuariosVisibilitySchema = z.object({
-  ids: z.array(z.string().regex(objectIdRegex, 'Cada id debe tener formato ObjectId válido')).min(1, 'Debes enviar al menos un id'),
+  ids: z.array(objectIdSchema).min(1, 'Debes enviar al menos un id'),
   visible: z.boolean()
 });
 
+export type CreateUsuarioBody = z.infer<typeof createUsuarioSchema>;
+export type UpdateUsuarioBody = z.infer<typeof updateUsuarioSchema>;
 export type DeleteManyUsuariosBody = z.infer<typeof deleteManyUsuariosSchema>;
+export type UsuarioIdParams = z.infer<typeof usuarioIdParamsSchema>;
 export type UpdateUsuarioVisibilityBody = z.infer<typeof updateUsuarioVisibilitySchema>;
 export type UpdateManyUsuariosVisibilityBody = z.infer<typeof updateManyUsuariosVisibilitySchema>;

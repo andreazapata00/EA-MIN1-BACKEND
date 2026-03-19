@@ -2,8 +2,11 @@ import { Router } from 'express';
 import * as usuarioController from '../controllers/usuarioController.js';
 import { validate } from '../middlewares/validatorMiddleware.js';
 import {
+	createUsuarioSchema,
 	deleteManyUsuariosSchema,
+	updateUsuarioSchema,
 	updateManyUsuariosVisibilitySchema,
+	usuarioIdParamsSchema,
 	updateUsuarioVisibilitySchema
 } from '../validators/usuarioValidator.js';
 
@@ -14,6 +17,88 @@ const router = Router();
  * tags:
  *   name: Usuarios
  *   description: API para la gestión de usuarios registrados en el sistema.
+ */
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     CreateUsuario:
+ *       type: object
+ *       required:
+ *         - fullName
+ *         - email
+ *         - password
+ *         - role
+ *       properties:
+ *         fullName:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 120
+ *           example: 'Juan Perez'
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: 'juan@relevo.io'
+ *         password:
+ *           type: string
+ *           minLength: 6
+ *           format: password
+ *           example: 'secret123'
+ *         role:
+ *           type: string
+ *           enum: [OWNER, INTERESTED]
+ *           example: 'INTERESTED'
+ *         location:
+ *           type: string
+ *           maxLength: 120
+ *         bio:
+ *           type: string
+ *           maxLength: 500
+ *         professionalBackground:
+ *           type: string
+ *           maxLength: 2000
+ *         preferredRegions:
+ *           type: array
+ *           items:
+ *             type: string
+ *         visible:
+ *           type: boolean
+ *           default: true
+ *
+ *     UpdateUsuario:
+ *       type: object
+ *       minProperties: 1
+ *       properties:
+ *         fullName:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 120
+ *         email:
+ *           type: string
+ *           format: email
+ *         password:
+ *           type: string
+ *           minLength: 6
+ *           format: password
+ *         role:
+ *           type: string
+ *           enum: [OWNER, INTERESTED]
+ *         location:
+ *           type: string
+ *           maxLength: 120
+ *         bio:
+ *           type: string
+ *           maxLength: 500
+ *         professionalBackground:
+ *           type: string
+ *           maxLength: 2000
+ *         preferredRegions:
+ *           type: array
+ *           items:
+ *             type: string
+ *         visible:
+ *           type: boolean
  */
 
 /**
@@ -59,7 +144,7 @@ router.get('/', usuarioController.getUsuarios);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.get('/:id', usuarioController.getUsuario);
+router.get('/:id', validate({ params: usuarioIdParamsSchema }), usuarioController.getUsuario);
 
 /**
  * @openapi
@@ -72,14 +157,14 @@ router.get('/:id', usuarioController.getUsuario);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Usuario'
+ *             $ref: '#/components/schemas/CreateUsuario'
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/', usuarioController.createUsuario);
+router.post('/', validate({ body: createUsuarioSchema }), usuarioController.createUsuario);
 
 /**
  * @openapi
@@ -123,7 +208,7 @@ router.post('/', usuarioController.createUsuario);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.delete('/batch', validate(deleteManyUsuariosSchema), usuarioController.deleteManyUsuarios);
+router.delete('/batch', validate({ body: deleteManyUsuariosSchema }), usuarioController.deleteManyUsuarios);
 
 /**
  * @openapi
@@ -177,7 +262,7 @@ router.delete('/batch', validate(deleteManyUsuariosSchema), usuarioController.de
  */
 router.patch(
 	'/batch/visibility',
-	validate(updateManyUsuariosVisibilitySchema),
+	validate({ body: updateManyUsuariosVisibilitySchema }),
 	usuarioController.patchManyUsuariosVisibility
 );
 
@@ -222,7 +307,10 @@ router.patch(
  */
 router.patch(
 	'/:id/visibility',
-	validate(updateUsuarioVisibilitySchema),
+	validate({
+		params: usuarioIdParamsSchema,
+		body: updateUsuarioVisibilitySchema
+	}),
 	usuarioController.patchUsuarioVisibility
 );
 
@@ -243,15 +331,13 @@ router.patch(
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Usuario'
+ *             $ref: '#/components/schemas/UpdateUsuario'
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.put('/:id', usuarioController.updateUsuario);
-
 /**
  * @openapi
  * /api/usuarios/{id}:
@@ -270,6 +356,15 @@ router.put('/:id', usuarioController.updateUsuario);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.delete('/:id', usuarioController.deleteUsuario);
+router.put(
+	'/:id',
+	validate({
+		params: usuarioIdParamsSchema,
+		body: updateUsuarioSchema
+	}),
+	usuarioController.updateUsuario
+);
+
+router.delete('/:id', validate({ params: usuarioIdParamsSchema }), usuarioController.deleteUsuario);
 
 export default router;

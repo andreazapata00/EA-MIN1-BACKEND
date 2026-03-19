@@ -1,5 +1,11 @@
 import { Router } from 'express';
 import * as ofertaController from '../controllers/ofertaController.js';
+import { validate } from '../middlewares/validatorMiddleware.js';
+import {
+	createOfertaSchema,
+	ofertaIdParamsSchema,
+	updateOfertaSchema
+} from '../validators/ofertaValidator.js';
 
 const router = Router();
 
@@ -53,7 +59,7 @@ router.get('/', ofertaController.getOfertas);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.get('/:id', ofertaController.getOferta);
+router.get('/:id', validate({ params: ofertaIdParamsSchema }), ofertaController.getOferta);
 
 /**
  * @openapi
@@ -66,14 +72,14 @@ router.get('/:id', ofertaController.getOferta);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Oferta'
+ *             $ref: '#/components/schemas/CreateOferta'
  *     responses:
  *       201:
  *         description: Oferta creada correctament
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/', ofertaController.createOferta);
+router.post('/', validate({ body: createOfertaSchema }), ofertaController.createOferta);
 
 /**
  * @openapi
@@ -92,14 +98,21 @@ router.post('/', ofertaController.createOferta);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Oferta'
+ *             $ref: '#/components/schemas/UpdateOferta'
  *     responses:
  *       200:
  *         description: Oferta actualitzada correctament
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.put('/:id', ofertaController.updateOferta);
+router.put(
+	'/:id',
+	validate({
+		params: ofertaIdParamsSchema,
+		body: updateOfertaSchema
+	}),
+	ofertaController.updateOferta
+);
 
 /**
  * @openapi
@@ -119,6 +132,6 @@ router.put('/:id', ofertaController.updateOferta);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.delete('/:id', ofertaController.deleteOferta);
+router.delete('/:id', validate({ params: ofertaIdParamsSchema }), ofertaController.deleteOferta);
 
 export default router;
