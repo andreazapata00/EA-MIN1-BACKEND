@@ -2,15 +2,31 @@ import { Request, Response, NextFunction } from 'express';
 import { z, ZodError } from 'zod';
 import { logger } from '../config.js';
 
+type ValidationSchemas = {
+  body?: z.ZodTypeAny;
+  params?: z.ZodTypeAny;
+  query?: z.ZodTypeAny;
+};
+
 /**
  * GENERIC VALIDATOR: 
- * Recibe cualquier esquema de Zod y valida el body de la petición.
+ * Valida de forma opcional body, params y query.
  */
-export const validate = (schema: z.ZodTypeAny) => 
+export const validate = (schemas: ValidationSchemas) =>
   (req: Request, res: Response, next: NextFunction): void => {
     try {
-      // Intentamos parsear el body con el esquema recibido
-      schema.parse(req.body);
+      if (schemas.body) {
+        schemas.body.parse(req.body);
+      }
+
+      if (schemas.params) {
+        schemas.params.parse(req.params);
+      }
+
+      if (schemas.query) {
+        schemas.query.parse(req.query);
+      }
+
       next();
     } catch (error) {
       if (error instanceof ZodError) {

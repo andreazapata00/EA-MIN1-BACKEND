@@ -1,5 +1,11 @@
 import { Router } from 'express';
 import * as ofertaController from '../controllers/ofertaController.js';
+import { validate } from '../middlewares/validatorMiddleware.js';
+import {
+	createOfertaSchema,
+	ofertaIdParamsSchema,
+	updateOfertaSchema
+} from '../validators/ofertaValidator.js';
 
 const router = Router();
 
@@ -8,6 +14,66 @@ const router = Router();
  * tags:
  *   name: Ofertas
  *   description: API per a la gestió d'ofertes d'empresa publicades a la plataforma.
+ */
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     CreateOferta:
+ *       type: object
+ *       required:
+ *         - region
+ *         - sector
+ *         - owner
+ *         - companyDescription
+ *       properties:
+ *         region:
+ *           type: string
+ *           example: 'Catalunya'
+ *         sector:
+ *           type: string
+ *           example: 'Tecnologia'
+ *         revenueRange:
+ *           type: string
+ *           enum: [UNDER_100K, BETWEEN_100K_500K, BETWEEN_500K_1M, BETWEEN_1M_5M, OVER_5M]
+ *         owner:
+ *           type: string
+ *           description: ID de l'usuari propietari (referencia a Usuario)
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d1'
+ *         businessAgeYears:
+ *           type: number
+ *           minimum: 0
+ *         employeeRange:
+ *           type: string
+ *           enum: [1_5, 6_10, 11_25, 26_50, 51_100, 100_PLUS]
+ *         companyDescription:
+ *           type: string
+ *           maxLength: 3000
+ *
+ *     UpdateOferta:
+ *       type: object
+ *       minProperties: 1
+ *       properties:
+ *         region:
+ *           type: string
+ *         sector:
+ *           type: string
+ *         revenueRange:
+ *           type: string
+ *           enum: [UNDER_100K, BETWEEN_100K_500K, BETWEEN_500K_1M, BETWEEN_1M_5M, OVER_5M]
+ *         owner:
+ *           type: string
+ *           description: ID de l'usuari propietari (referencia a Usuario)
+ *         businessAgeYears:
+ *           type: number
+ *           minimum: 0
+ *         employeeRange:
+ *           type: string
+ *           enum: [1_5, 6_10, 11_25, 26_50, 51_100, 100_PLUS]
+ *         companyDescription:
+ *           type: string
+ *           maxLength: 3000
  */
 
 /**
@@ -53,7 +119,7 @@ router.get('/', ofertaController.getOfertas);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.get('/:id', ofertaController.getOferta);
+router.get('/:id', validate({ params: ofertaIdParamsSchema }), ofertaController.getOferta);
 
 /**
  * @openapi
@@ -66,14 +132,22 @@ router.get('/:id', ofertaController.getOferta);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Oferta'
+ *             $ref: '#/components/schemas/CreateOferta'
+ *           example:
+ *             region: Catalunya
+ *             sector: Tecnologia
+ *             revenueRange: BETWEEN_100K_500K
+ *             owner: 64f1a2b3c4d5e6f7a8b9c0d1
+ *             businessAgeYears: 5
+ *             employeeRange: 11_25
+ *             companyDescription: Empresa de tecnologia sostenible fundada el 2019.
  *     responses:
  *       201:
  *         description: Oferta creada correctament
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/', ofertaController.createOferta);
+router.post('/', validate({ body: createOfertaSchema }), ofertaController.createOferta);
 
 /**
  * @openapi
@@ -92,14 +166,25 @@ router.post('/', ofertaController.createOferta);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Oferta'
+ *             $ref: '#/components/schemas/UpdateOferta'
+ *           example:
+ *             sector: Tecnologia
+ *             employeeRange: 26_50
+ *             companyDescription: Actualizacion de la descripcion de la empresa.
  *     responses:
  *       200:
  *         description: Oferta actualitzada correctament
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.put('/:id', ofertaController.updateOferta);
+router.put(
+	'/:id',
+	validate({
+		params: ofertaIdParamsSchema,
+		body: updateOfertaSchema
+	}),
+	ofertaController.updateOferta
+);
 
 /**
  * @openapi
@@ -119,6 +204,6 @@ router.put('/:id', ofertaController.updateOferta);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.delete('/:id', ofertaController.deleteOferta);
+router.delete('/:id', validate({ params: ofertaIdParamsSchema }), ofertaController.deleteOferta);
 
 export default router;

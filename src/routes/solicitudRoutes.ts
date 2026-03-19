@@ -1,5 +1,12 @@
 import { Router } from 'express';
 import * as solicitudController from '../controllers/solicitudController.js';
+import { validate } from '../middlewares/validatorMiddleware.js';
+import {
+	createSolicitudSchema,
+	solicitudIdParamsSchema,
+	updateSolicitudSchema,
+	updateSolicitudStatusSchema
+} from '../validators/solicitudValidator.js';
 
 const router = Router();
 
@@ -8,6 +15,59 @@ const router = Router();
  * tags:
  *   name: Solicitudes
  *   description: API per a la gestió de sol·licituds d'accés a ofertes.
+ */
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     CreateSolicitud:
+ *       type: object
+ *       required:
+ *         - owner
+ *         - interestedUser
+ *         - opportunity
+ *       properties:
+ *         owner:
+ *           type: string
+ *           description: ID de l'usuari propietari
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d1'
+ *         interestedUser:
+ *           type: string
+ *           description: ID de l'usuari interessat
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d2'
+ *         opportunity:
+ *           type: string
+ *           description: ID de l'oferta
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d3'
+ *         message:
+ *           type: string
+ *           maxLength: 1000
+ *           example: 'I am interested in this opportunity.'
+ *
+ *     UpdateSolicitud:
+ *       type: object
+ *       properties:
+ *         owner:
+ *           type: string
+ *           description: ID de l'usuari propietari
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d1'
+ *         interestedUser:
+ *           type: string
+ *           description: ID de l'usuari interessat
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d2'
+ *         opportunity:
+ *           type: string
+ *           description: ID de l'oferta
+ *           example: '64f1a2b3c4d5e6f7a8b9c0d3'
+ *         status:
+ *           type: string
+ *           enum: [PENDING, ACCEPTED, REJECTED]
+ *           example: 'ACCEPTED'
+ *         message:
+ *           type: string
+ *           maxLength: 1000
+ *           example: 'Updated message'
  */
 
 /**
@@ -55,7 +115,7 @@ router.get('/', solicitudController.getSolicitudes);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get('/:id', solicitudController.getSolicitud);
+router.get('/:id', validate({ params: solicitudIdParamsSchema }), solicitudController.getSolicitud);
 
 /**
  * @openapi
@@ -69,6 +129,11 @@ router.get('/:id', solicitudController.getSolicitud);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/CreateSolicitud'
+ *           example:
+ *             owner: 64f1a2b3c4d5e6f7a8b9c0d1
+ *             interestedUser: 64f1a2b3c4d5e6f7a8b9c0d2
+ *             opportunity: 64f1a2b3c4d5e6f7a8b9c0d3
+ *             message: I am interested in this opportunity.
  *     responses:
  *       201:
  *         description: Sol·licitud creada correctament
@@ -81,7 +146,7 @@ router.get('/:id', solicitudController.getSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/', solicitudController.createSolicitud);
+router.post('/', validate({ body: createSolicitudSchema }), solicitudController.createSolicitud);
 
 /**
  * @openapi
@@ -102,6 +167,9 @@ router.post('/', solicitudController.createSolicitud);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/UpdateSolicitud'
+ *           example:
+ *             status: ACCEPTED
+ *             message: Updated message
  *     responses:
  *       200:
  *         description: Sol·licitud actualitzada correctament
@@ -116,7 +184,14 @@ router.post('/', solicitudController.createSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.put('/:id', solicitudController.updateSolicitud);
+router.put(
+	'/:id',
+	validate({
+		params: solicitudIdParamsSchema,
+		body: updateSolicitudSchema
+	}),
+	solicitudController.updateSolicitud
+);
 
 /**
  * @openapi
@@ -139,7 +214,7 @@ router.put('/:id', solicitudController.updateSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.delete('/:id', solicitudController.deleteSolicitud);
+router.delete('/:id', validate({ params: solicitudIdParamsSchema }), solicitudController.deleteSolicitud);
 
 /**
  * @openapi
@@ -182,6 +257,13 @@ router.delete('/:id', solicitudController.deleteSolicitud);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.patch('/:id/status', solicitudController.patchEstadoSolicitud);
+router.patch(
+	'/:id/status',
+	validate({
+		params: solicitudIdParamsSchema,
+		body: updateSolicitudStatusSchema
+	}),
+	solicitudController.patchEstadoSolicitud
+);
 
 export default router;
