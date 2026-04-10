@@ -82,7 +82,7 @@ export interface IOferta {
   businessAgeYears?: number;
   employeeRange?: (typeof employeeRanges)[number];
   companyDescription: string;
-  publishedAt?: Date;
+  publishedAt?: Date; //publishedAt: new Date('2026-04-10T12:30:00Z')
   createdAt?: Date;
   updatedAt?: Date;
 }

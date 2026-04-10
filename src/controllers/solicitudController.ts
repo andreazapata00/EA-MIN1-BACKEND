@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { logger } from '../config.js';
 import { ISolicitud, SolicitudModel } from '../models/solicitudModel.js';
 import * as solicitudService from '../services/solicitudService.js';
-import { OfertaModel } from '../models/ofertaModel.js';
 
 export const getSolicitudes = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -29,37 +28,16 @@ export const getSolicitud = async (req: Request<{ id: string }>, res: Response):
   }
 };
 
-export const createSolicitud = async (req: Request, res: Response): Promise<void> => {
+export const createSolicitud = async (
+  req: Request<{}, {}, Partial<ISolicitud>>,
+  res: Response
+): Promise<void> => {
   try {
-    const { opportunityId, interestedUserId, message } = req.body;
-
-    // 1. Buscamos la oferta (esto ya lo hacías)
-    const oferta = await OfertaModel.findById(opportunityId);
-    if (!oferta) {
-       res.status(404).json({ message: 'Oferta no encontrada' });
-       return;
-    }
-
-    // 2. Creamos la solicitud básica
-    const nueva = await solicitudService.crearSolicitud({
-      opportunity: opportunityId,
-      interestedUser: interestedUserId,
-      owner: oferta.owner,
-      message: message
-    } as any);
-
-    // 3. LA CLAVE: En lugar de encadenar el populate al crear, 
-    // lo hacemos sobre el ID de la que acabamos de guardar.
-    const resultado = await SolicitudModel.findById(nueva._id)
-      .populate('opportunity')
-      .populate('interestedUser')
-      .lean(); // .lean() evita problemas de recursividad en el JSON
-
-    res.status(201).json(resultado);
-
+    const nuevaSolicitud = await solicitudService.crearSolicitud(req.body);
+    res.status(201).json(nuevaSolicitud);
   } catch (error) {
-    logger.error(error, 'Error en createSolicitud');
-    res.status(500).json({ message: 'Error interno', error: (error as Error).message });
+    logger.error(error, 'Error creando solicitud');
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -114,18 +92,14 @@ export const patchEstadoSolicitud = async (
   }
 };
 
-
-// solicitudController.ts
-
 export const deleteMultiple = async (req: Request, res: Response) => {
   try {
-    const { ids } = req.body; // Recibimos el array de IDs ['id1', 'id2'...]
+    const { ids } = req.body;
 
     if (!ids || !Array.isArray(ids)) {
       return res.status(400).json({ message: 'Se requiere un array de IDs' });
     }
 
-    // Borramos todos los que coincidan con los IDs del array
     await SolicitudModel.deleteMany({
       _id: { $in: ids }
     });
@@ -136,3 +110,4 @@ export const deleteMultiple = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
