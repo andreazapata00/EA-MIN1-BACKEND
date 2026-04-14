@@ -74,3 +74,47 @@ Content-Type: application/json
 {
     "country": "Spain"
 }
+
+
+
+##############################################
+# OFERTAS
+##############################################
+
+### Get all ofertas (Fes això primer per copiar un ID real d'una oferta)
+GET {{baseUrl}}/ofertas/
+
+# Després de fer el GET de dalt, copia l'ID d'una oferta i posa'l aquí:
+@ofertaId = SUBSTITUEIX_AIXO_PER_L_ID_DE_LA_OFERTA
+
+### Update an existing oferta
+PUT {{baseUrl}}/ofertas/{{ofertaId}}
+Content-Type: application/json
+
+{
+    "sector": "Nou Sector Tecnològic",
+    "businessAgeYears": 10
+}
+
+
+##############################################
+# HISTORIALS (Auditoria)
+##############################################
+
+### Get all historials (Comprova si s'ha guardat el canvi anterior)
+GET {{baseUrl}}/historials/
+
+### Get historials amb paginació (Ex: Pàgina 1, màxim 5 resultats)
+GET {{baseUrl}}/historials?page=1&limit=5
+
+### Get historials amb cercador (Ex: buscar només quan s'ha canviat el "sector")
+GET {{baseUrl}}/historials?search=sector
+
+# Després de fer el GET general, copia l'ID d'un historial i posa'l aquí:
+@historialId = SUBSTITUEIX_AIXO_PER_L_ID_DE_L_HISTORIAL
+
+### Get a specific historial
+GET {{baseUrl}}/historials/{{historialId}}
+
+### Delete a historial (El CRUD ho demana per a l'exercici)
+DELETE {{baseUrl}}/historials/{{historialId}}

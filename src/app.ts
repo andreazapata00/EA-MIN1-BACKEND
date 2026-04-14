@@ -7,6 +7,7 @@ import solicitudRoutes from './routes/solicitudRoutes.js';
 import { httpLogger } from './middlewares/loggerMiddleware.js';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger.js';
+import historialRoutes from './routes/historialRoutes';
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.get('/ping', (_req: Request, res: Response) => {
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/ofertas', ofertaRoutes);
 app.use('/api/solicitudes', solicitudRoutes);
+app.use('/api/historials', historialRoutes);
 
 /**
  * 📖 API DOCUMENTATION (SWAGGER)
